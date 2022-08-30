@@ -1,0 +1,15 @@
+
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "code-d",
+            "request": "launch",
+            "name": "Debug D project",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "build default",
+            "program": "./bin/ion.exe",
+            "args": []
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+{
+	"authors": [
+		"Alisa Lain"
+	],
+	"copyright": "Copyright (c) 2022 Alisa Lain",
+	"dependencies": {
+	},
+	"description": "A simple c-style interpreted programming language",
+	"license": "GNU GPL 3.0",
+	"name": "ion",
+	"targetPath": "./bin/"
+}

@@ -1,0 +1,24 @@
+
+{
+	"version": "2.0.0",
+	"tasks": [
+        {
+            "type": "dub",
+            "run": false,
+            "cwd": "${workspaceFolder}",
+            "compiler": "$current",
+            "archType": "$current",
+            "buildType": "$current",
+            "configuration": "$current",
+            "problemMatcher": [
+                "$dmd"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "label": "build default",
+            "detail": "dub build --compiler=dmd -a=x86_64 -b=debug -c=application"
+        }
+    ]
+}
