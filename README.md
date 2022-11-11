@@ -1,4 +1,4 @@
-# Ion
+# Ion (NOT READY TO USE. CURRENTLY IN PRE-ALPHA STAGES)
 A simple c-style interpreted programming language
 
 # Ion language specification
