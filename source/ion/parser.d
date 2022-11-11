@@ -2,7 +2,7 @@ module ion.parser;
 
 import std.conv: to;
 import std.format: format;
-import std.stdio: writeln;
+import std.stdio: writeln, writef;
 import std.algorithm: canFind;
 
 import ion.token;
@@ -41,6 +41,11 @@ class Parser {
     private bool _isEOF = false;
     private bool _exceptionCaught = false;
 
+    // TODO think of better solution
+    private byte _countParen = 0; // ()
+    private byte _countBracket = 0; // []
+    private byte _countBrace = 0; // {}
+
     this(Lexer lexer) {
         _lexer = lexer;
         _currentToken = _lexer.getNextToken();
@@ -55,11 +60,13 @@ class Parser {
      *   tokenExp = Token parser expects
      *   pos = Position of parser
      */
-    private AstNode* error(TokenType tokenGot, TokenType tokenExp) {
+    private AstNode* error(TokenType tokenGot, TokenType tokenExp) { 
         // if (errorStatus()) return errorNode(); // if error occured, don't print anything
 
-        string exp = tokenStrings.keys.canFind(tokenExp) ? tokenStrings[tokenExp] : tokenExp.to!string;
-        string got = tokenStrings.keys.canFind(tokenGot) ? tokenStrings[tokenGot] : tokenGot.to!string;
+        // string exp = tokenStrings.keys.canFind(tokenExp) ? tokenStrings[tokenExp] : tokenExp.to!string;
+        // string got = tokenStrings.keys.canFind(tokenGot) ? tokenStrings[tokenGot] : tokenGot.to!string;
+        string exp = tokenExp.to!string;
+        string got = tokenGot.to!string;
         string err = 
             "\n%d,%d: Expected \"%s\" instead of \"%s\"."
             .format(_lexer.line + 1, _lexer.linePos, exp, got);
@@ -98,6 +105,8 @@ class Parser {
         _isEOF = true;
     }
 
+    // TODO remove this or think of other way
+    // instead of shift(EOF)
     private bool checkUnpaired() {
         TokenType[] errorTokens = [TokenType.RPAREN, TokenType.RBRACE, TokenType.RBRACKET];
         
@@ -123,6 +132,7 @@ class Parser {
      *   type = Expected token type
      */
     private void shift(TokenType type) {
+        // writef(_currentToken.type.to!string ~ ", ");
         if (_currentToken.type == type) {
             _currentToken = _lexer.getNextToken();
         // } else if (_currentToken.type == TokenType.EOF) {
@@ -140,7 +150,7 @@ class Parser {
     private void mutate(ref Token token, TokenType type) { token.type = type; }
 
     /** 
-     * Parses for `PLUS|MINUS factor`, `INTEGER`, `LPAREN expr RPAREN` \
+     * Parses for `PLUS|MINUS factor`, `INT`, `LPAREN expr RPAREN` \
      * Parses unary, numbers, parenthesis
      * Returns: value
      */
@@ -169,15 +179,23 @@ class Parser {
                 AstNode* node = new AstNode(token, fact);
             return node;
 
-            case TokenType.INTEGER:
-                shift(TokenType.INTEGER);
+            case TokenType.INT:
+                shift(TokenType.INT);
                 AstNode* node = new AstNode(token, token.ival);
             return node;
 
             case TokenType.LPAREN:
+                byte parenCount = _countParen;
+                _countParen++;
+
                 shift(TokenType.LPAREN);
                 AstNode* node = expr();
                 shift(TokenType.RPAREN);
+                
+                _countParen--;
+                if (parenCount != _countParen) {
+                    return error("unmatched parenthesis");
+                }
             return node;
 
             // explicitly returning empty node because
@@ -200,7 +218,7 @@ class Parser {
      * Returns: value
      */
     private AstNode* term() {
-        AstNode* nodeptr = factor();
+        AstNode* leftptr = factor();
 
         TokenType[] allowedTokens = [TokenType.STAR, TokenType.SLASH, TokenType.PERCENT, TokenType.POW];
         
@@ -230,11 +248,11 @@ class Parser {
                 default: return error("primary expression expected");
             }
 
-            AstNode* rptr = factor();
-            AstNode* newNode = new AstNode(nodeptr, token, rptr);
-            nodeptr = newNode;
+            AstNode* rightptr = factor();
+            AstNode* newNode = new AstNode(leftptr, token, rightptr);
+            leftptr = newNode;
         }
-        return nodeptr;
+        return leftptr;
     }
 
     /** 
@@ -242,7 +260,7 @@ class Parser {
      * \
      * expr   : term (**PLUS**|**MINUS** term) \
      * term   : factor (**MUL**|**DIV** factor) \
-     * factor : **INTEGER** | **LPAREN** expr **RPAREN** 
+     * factor : **INT** | **LPAREN** expr **RPAREN** 
      * Returns: evaluated result `EvalReturn(status, result)`
      */ 
     private AstNode* expr() {
@@ -279,6 +297,8 @@ class Parser {
 
     public AstNode parse() {
         AstNode* tree = expr();
+
+        shift(TokenType.EOF);
 
         return deref(tree);
     }

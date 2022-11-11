@@ -144,6 +144,18 @@ shared static this() {
         TokenType.AT: "@",
         TokenType.COLON: ":",
         TokenType.SEMICOLON: ";",
+        
+        TokenType.DIV: "/",
+        TokenType.MOD: "%",
+        TokenType.ADD: "+",
+        TokenType.SUB: "-",
+        TokenType.MUL: "*",
+        TokenType.NEG: "+",
+        TokenType.POS: "-",
+        TokenType.INC: "++",
+        TokenType.DEC: "--",
+        TokenType.POW: "^^",
+        TokenType.CONCAT: "~",
     ];
 }
 
@@ -209,13 +221,15 @@ enum TokenType {
 
     /* ---------------------------------- types --------------------------------- */
     // numeric types
-    INTEGER, FLOAT,
+    BYTE, UBYTE, SHORT, USHORT, INT, UINT, LONG, ULONG, 
+    // floating point types
+    FLOAT, DOUBLE, REAL,
     // string types
     CHAR, STRING,
-    // 
-    BOOL,
+    // boolean
+    BOOL, TRUE, FALSE, 
     // other types
-    TRUE, FALSE, NULL, VOID, 
+    NULL, VOID, 
     //
     ENUM, AUTO, VAR, DELEGATE, 
     // TODO ptr
